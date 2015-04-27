@@ -15,11 +15,13 @@ public class DataAccessService
 {
   private ICache<int, MyModel> _myModelCache;
   private IDictionary<int, ICache<int, MyModel>> _myModelByGroupCaches;
+  private IMyModelRepository _myModelRepository;
   
   public DataAccessService()
   {
     _myModelCache = new PicnicCache<int, MyModel>(x => x.Id);
     _myModelByGroupCaches = new Dictionary<int, ICache<int, MyModel>>();
+    _myModelRepository = new MyModelRepository();
   }
   
   public MyModel GetMyModelById(int id)
