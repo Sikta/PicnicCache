@@ -1,8 +1,8 @@
-﻿using System;
+﻿//The MIT License (MIT)
+//https://github.com/DoloSoftware/PicnicCache/blob/master/LICENSE
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PicnicCache
 {
@@ -17,15 +17,15 @@ namespace PicnicCache
         /// Fetch item by key.
         /// </summary>
         /// <param name="key">Item Key</param>
-        /// <param name="del">Func to get the item if it's not already in the cache.</TValue></param>
-        /// <returns></returns>
+        /// <param name="del">Func to get the item if it's not already in the cache.</param>
+        /// <returns>Item</returns>
         TValue Fetch(TKey key, Func<TValue> del);
 
         /// <summary>
         /// Fetch all items.
         /// </summary>
         /// <param name="del">Func to get all items if they have not already been cached.</param>
-        /// <returns></returns>
+        /// <returns>Items</returns>
         IEnumerable<TValue> FetchAll(Func<IEnumerable<TValue>> del);
 
         /// <summary>
