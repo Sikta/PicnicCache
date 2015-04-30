@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>PicnicCache</id>
+    <version>0.1.0.0</version>
+    <title>PicnicCache</title>
+    <authors>Lee Olsen</authors>
+    <owners>Lee Olsen</owners>
+    <licenseUrl>https://github.com/DoloSoftware/PicnicCache/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/DoloSoftware/PicnicCache</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package contains the PicnicCache library. This package is currently under development...</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>Cache Caching</tags>
+  </metadata>
+</package>

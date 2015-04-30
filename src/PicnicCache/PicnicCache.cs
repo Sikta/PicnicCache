@@ -87,35 +87,45 @@ namespace PicnicCache
             return isItemInCache;
         }
 
-        public bool RemoveAndDelete(TKey key, Action del)
+        public bool Remove(TValue value)
         {
-            del();
-            return Remove(key);
+            return Remove(_keyProperty(value));
         }
 
-        public bool RemoveAndDelete(TKey key, Action<TKey> del)
+        public bool Delete(TKey key, Action del)
         {
+            var result = Remove(key);
+            del();
+            return result;
+        }
+
+        public bool Delete(TKey key, Action<TKey> del)
+        {
+            var result = Remove(key);
             del(key);
-            return Remove(key);
+            return result;
         }
 
-        public bool RemoveAndDelete(TValue value, Action del)
+        public bool Delete(TValue value, Action del)
         {
+            var result = Remove(_keyProperty(value));
             del();
-            return Remove(_keyProperty(value));
+            return result;
         }
 
-        public bool RemoveAndDelete(TValue value, Action<TValue> del)
+        public bool Delete(TValue value, Action<TValue> del)
         {
+            var result = Remove(_keyProperty(value));
             del(value);
-            return Remove(_keyProperty(value));
+            return result;
         }
 
-        public bool RemoveAndDelete(TValue value, Action<TKey> del)
+        public bool Delete(TValue value, Action<TKey> del)
         {
             TKey key = _keyProperty(value);
+            var result = Remove(key);
             del(key);
-            return Remove(key);
+            return result;
         }
 
         public void SaveAll(Action<IEnumerable<TValue>> del)
@@ -123,6 +133,33 @@ namespace PicnicCache
             del(_dictionary.Values);
         }
 
+        public void Save(TValue value, Action del)
+        {
+            UpdateCache(value);
+            del();
+        }
+
+        public void Save(TValue value, Action<TValue> del)
+        {
+            UpdateCache(value);
+            del(value);
+        }
+
+        public void SaveAll(TValue value, Action<IEnumerable<TValue>> del)
+        {
+            UpdateCache(value);
+            del(_dictionary.Values);
+        }
+
+        public void SaveAll(IEnumerable<TValue> values, Action<IEnumerable<TValue>> del)
+        {
+            foreach (var value in values)
+            {
+                UpdateCache(value);
+            }
+            del(_dictionary.Values);
+        }
+        
         public void UpdateCache(TValue value)
         {
             var key = _keyProperty(value);
@@ -139,31 +176,12 @@ namespace PicnicCache
             }
         }
 
-        public void UpdateCacheAndSave(TValue value, Action del)
-        {
-            UpdateCache(value);
-            del();
-        }
-
-        public void UpdateCacheAndSave(TValue value, Action<TValue> del)
-        {
-            UpdateCache(value);
-            del(value);
-        }
-
-        public void UpdateCacheAndSaveAll(TValue value, Action<IEnumerable<TValue>> del)
-        {
-            UpdateCache(value);
-            del(_dictionary.Values);
-        }
-
-        public void UpdateCacheAndSaveAll(IEnumerable<TValue> values, Action<IEnumerable<TValue>> del)
+        public void UpdateCache(IEnumerable<TValue> values)
         {
             foreach (var value in values)
             {
                 UpdateCache(value);
             }
-            del(_dictionary.Values);
         }
 
         #endregion

@@ -194,11 +194,11 @@ namespace PicnicCache.Tests.Tests
             return models;
         }
 
-        private void ValidateListsAreEqual<T>(IList<T> expected, IList<T> actual)
+        private void ValidateListsAreEqual(IList<TestModel> expected, IList<TestModel> actual)
         {
             for (int i = 0; i < expected.Count; i++)
             {
-                Assert.AreEqual(expected[i], actual[i]);
+                Assert.AreEqual(expected[i].Id, actual[i].Id);
             }
         }
 
