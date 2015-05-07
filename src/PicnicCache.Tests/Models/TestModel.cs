@@ -20,5 +20,12 @@ namespace PicnicCache.Tests.Models
             GroupId = groupId;
             Text = text;
         }
+
+        public TestModel(TestModel model)
+        {
+            Id = model.Id;
+            GroupId = model.GroupId;
+            Text = model.Text;
+        }
     }
 }

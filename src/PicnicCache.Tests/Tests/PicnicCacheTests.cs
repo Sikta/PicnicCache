@@ -109,6 +109,30 @@ namespace PicnicCache.Tests.Tests
         }
 
         [TestMethod]
+        public void Fetch_ItemIsDeleted_ReturnNull()
+        {
+            var firstItem = _cache.Fetch(_list.First().Id, () => _list.First());
+            _cache.Delete(firstItem);
+
+            var deletedItem = _cache.Fetch(_list.First().Id, () => _list.First());
+
+            Assert.IsNull(deletedItem);
+        }
+
+        [TestMethod]
+        public void Fetch_ItemIsModified_ReturnModifiedItem()
+        {
+            var firstItem = _cache.Fetch(_list.First().Id, () => _list.First());
+            var modifiedItem = new TestModel(firstItem);
+            modifiedItem.Text = "LOLCAT";
+            _cache.Update(modifiedItem);
+
+            var cacheItem = _cache.Fetch(_list.First().Id, () => _list.First());
+
+            Assert.AreEqual(modifiedItem, cacheItem);
+        }
+
+        [TestMethod]
         public void FetchAll_CacheIsEmpty_ReturnCorrectItems()
         {
             var cacheItems = _cache.FetchAll(() => _list).ToList();
@@ -137,44 +161,6 @@ namespace PicnicCache.Tests.Tests
             var cacheItems = _cache.FetchAll(() => secondList).ToList();
 
             ValidateListsAreEqual(_list, cacheItems);
-        }
-
-        [TestMethod]
-        public void SaveAll_CacheIsEmpty_NothingIsSaved()
-        {
-            IEnumerable<TestModel> secondList = null;
-
-            _cache.SaveAll(x => secondList = x);
-
-            Assert.AreEqual(0, secondList.Count());
-        }
-
-        [TestMethod]
-        public void SaveAll_CacheIsPartiallyLoaded_ItemsAreSaved()
-        {
-            IEnumerable<TestModel> secondList = null;
-            var list = new List<TestModel>();
-            var itemOne = new TestModel(1, 1, "Test1");
-            var itemTwo = new TestModel(3, 3, "Test3");
-            list.Add(itemOne);
-            list.Add(itemTwo);
-            var firstItem = _cache.Fetch(1, () => itemOne);
-            var secondItem = _cache.Fetch(3, () => itemTwo);
-
-            _cache.SaveAll(x => secondList = x);
-
-            ValidateListsAreEqual(list, secondList.ToList());
-        }
-
-        [TestMethod]
-        public void SaveAll_CacheIsLoaded_ItemsAreSaved()
-        {
-            IEnumerable<TestModel> secondList = null;
-            var firstList = _cache.FetchAll(() => _list);
-
-            _cache.SaveAll(x => secondList = x);
-
-            ValidateListsAreEqual(_list, secondList.ToList());
         }
 
         #region Private helper methods

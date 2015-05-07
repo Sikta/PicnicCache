@@ -37,7 +37,9 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheItem.cs" />
     <Compile Include="ICache.cs" />
+    <Compile Include="ICacheItem.cs" />
     <Compile Include="PicnicCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

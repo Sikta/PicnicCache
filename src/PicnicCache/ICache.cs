@@ -29,103 +29,50 @@ namespace PicnicCache
         IEnumerable<TValue> FetchAll(Func<IEnumerable<TValue>> del);
 
         /// <summary>
-        /// Remove the item from the cache by key.
+        /// Set the item state to deleted.
         /// </summary>
         /// <param name="key">Item Key</param>
         /// <returns>True if item was in cache otherwise false.</returns>
-        bool Remove(TKey key);
+        bool Delete(TKey key);
 
         /// <summary>
-        /// Remove the item from the cache by value.
+        /// Set the item state to deleted by value.
         /// </summary>
         /// <param name="value">Item Key</param>
         /// <returns>True if item was in cache otherwise false.</returns>
-        bool Remove(TValue value);
+        bool Delete(TValue value);
 
-        /// <summary>
-        /// Remove the item from the cache by key and delete it.
-        /// </summary>
-        /// <param name="key">Item Key</param>
-        /// <param name="del">Action to delete the item.</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TKey key, Action del);
-
-        /// <summary>
-        /// Remove the item from the cache by key and delete it.
-        /// </summary>
-        /// <param name="key">Item Key</param>
-        /// <param name="del">Action to delete the item by key.</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TKey key, Action<TKey> del);
-
-        /// <summary>
-        /// Remove the item from the cache and delete it.
-        /// </summary>
-        /// <param name="value">Item</param>
-        /// <param name="del">Action to delete the item.</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TValue value, Action del);
-
-        /// <summary>
-        /// Remove the item from the cache and delete it.
-        /// </summary>
-        /// <param name="value">Item</param>
-        /// <param name="del">Action to delete the item by value.</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TValue value, Action<TValue> del);
-
-        /// <summary>
-        /// Remove the item from the cache and delete it.
-        /// </summary>
-        /// <param name="value">Item</param>
-        /// <param name="del">Action to delete the item by key.</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TValue value, Action<TKey> del);
-
-        /// <summary>
-        /// Update the cached item or add it to the cache and save it.
-        /// </summary>
-        /// <param name="value">Value to update or add and save.</param>
-        /// <param name="del">Action to save the item.</param>
-        void Save(TValue value, Action del);
-
-        /// <summary>
-        /// Update the cached item or add it to the cache and save it.
-        /// </summary>
-        /// <param name="value">Value to update or add and save.</param>
-        /// <param name="del">Action to save the item.</param>
-        void Save(TValue value, Action<TValue> del);
-        
         /// <summary>
         /// Save all items from the cache.
         /// </summary>
-        /// <param name="del">Action to save all cached items.</param>
-        void SaveAll(Action<IEnumerable<TValue>> del);
-        
-        /// <summary>
-        /// Update the cached item or add it to the cache and save all items in the cache.
-        /// </summary>
-        /// <param name="value">Value to update or add.</param>
-        /// <param name="del">Action to save all items in the cache.</param>
-        void SaveAll(TValue value, Action<IEnumerable<TValue>> del);
+        /// <param name="saveDelegate">Action to update, add and delete all CacheItems.</param>
+        void Save(Action<IEnumerable<CacheItem<TValue>>> saveDelegate);
 
         /// <summary>
-        /// Update the cached items or add them to the cache and save all items in the cache.
+        /// Save all items from the cache.
         /// </summary>
-        /// <param name="values">Values to update or add.</param>
-        /// <param name="del">Action to save all items in the cache.</param>
-        void SaveAll(IEnumerable<TValue> values, Action<IEnumerable<TValue>> del);
+        /// <param name="updateDelegate">Action to update the cached items</param>
+        /// <param name="addDelegate">Action to add the cached items</param>
+        /// <param name="deleteDelegate">Action to delete the cached items</param>
+        void Save(Action<IEnumerable<TValue>> updateDelegate, Action<IEnumerable<TValue>> addDelegate, Action<IEnumerable<TValue>> deleteDelegate);
+
+        /// <summary>
+        /// Save all items from the cache.
+        /// </summary>
+        /// <param name="updateAddDelegate">Action to update and add the cached items.</param>
+        /// <param name="deleteDelegate">Action to delete the cached items.</param>
+        void Save(Action<IEnumerable<TValue>> updateAddDelegate, Action<IEnumerable<TValue>> deleteDelegate);
 
         /// <summary>
         /// Update the cached item or add it to the cache.
         /// </summary>
         /// <param name="value">Value to update or add.</param>
-        void UpdateCache(TValue value);
+        void Update(TValue value);
 
         /// <summary>
         /// Update the cached items or add them to the cache.
         /// </summary>
         /// <param name="values">Values to update or add.</param>
-        void UpdateCache(IEnumerable<TValue> values);
+        void Update(IEnumerable<TValue> values);
     }
 }
