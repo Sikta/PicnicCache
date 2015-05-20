@@ -13,35 +13,30 @@ public class MyModel
 
 public class DataAccessService
 {
-  private ICache<int, MyModel> _myModelCache;
-  private IDictionary<int, ICache<int, MyModel>> _myModelByGroupCaches;
+  private IConfiguredCache<int, MyModel> _myModelCache;
   private IMyModelRepository _myModelRepository;
   
   public DataAccessService()
   {
-    _myModelCache = new PicnicCache<int, MyModel>(x => x.Id);
-    _myModelByGroupCaches = new Dictionary<int, ICache<int, MyModel>>();
+    var cacheConfig = new PicnicCacheConfiguration(_myModelRepository.GetMyModelById,
+                                                   _myModelRepository.GetAllMyModel,
+                                                   _myModelRepository.SaveModels);
+    _myModelCache = new ConfiguredPicnicCache<int, MyModel>(x => x.Id);
     _myModelRepository = new MyModelRepository();
   }
   
   public MyModel GetMyModelById(int id)
   {
-    return _myModelCache.Fetch(id, () => _myModelRepository.GetMyModelById(id));
+    return _myModelCache.Fetch(id);
   }
   
   public IEnumerable<MyModel> GetAllMyModel()
   {
-    return _myModelCache.FetchAll(() => _myModelRepository.GetAllMyModel());
+    return _myModelCache.FetchAll();
   }
   
-  public IEnumerable<MyModel> GetAllMyModelForGroup(int groupId)
+  public void Save()
   {
-    ICache<int, MyModel> myModelByGroupCache;
-    if (!_myModelByGroupCaches.TryGetValue(groupId, out myModelByGroupCache))
-    {
-      myModelByGroupCache = new PicnicCache<int, MyModel>(x => x.Id);
-      _myModelByGroupCaches.Add(groupId, myModelByGroupCache);
-    }
-    return myModelByGroupCache.FetchAll(() => _myModelRepository.GetAllMyModelForGroup(groupId));
+    _myModelCache.Save();
   }
 }
