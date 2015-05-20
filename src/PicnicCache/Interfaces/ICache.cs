@@ -6,13 +6,8 @@ using System.Collections.Generic;
 
 namespace PicnicCache
 {
-    public interface ICache<TKey, TValue> where TValue : class, new()
+    public interface ICache<TKey, TValue> : ICacheBase<TKey, TValue> where TValue : class, new()
     {
-        /// <summary>
-        /// Clear the cache.
-        /// </summary>
-        void ClearAll();
-
         /// <summary>
         /// Fetch item by key.
         /// </summary>
@@ -29,24 +24,10 @@ namespace PicnicCache
         IEnumerable<TValue> FetchAll(Func<IEnumerable<TValue>> del);
 
         /// <summary>
-        /// Set the item state to deleted.
-        /// </summary>
-        /// <param name="key">Item Key</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TKey key);
-
-        /// <summary>
-        /// Set the item state to deleted by value.
-        /// </summary>
-        /// <param name="value">Item Key</param>
-        /// <returns>True if item was in cache otherwise false.</returns>
-        bool Delete(TValue value);
-
-        /// <summary>
         /// Save all items from the cache.
         /// </summary>
         /// <param name="saveDelegate">Action to update, add and delete all CacheItems.</param>
-        void Save(Action<IEnumerable<CacheItem<TValue>>> saveDelegate);
+        void Save(Action<IEnumerable<ICacheItem<TValue>>> saveDelegate);
 
         /// <summary>
         /// Save all items from the cache.
@@ -62,17 +43,5 @@ namespace PicnicCache
         /// <param name="updateAddDelegate">Action to update and add the cached items.</param>
         /// <param name="deleteDelegate">Action to delete the cached items.</param>
         void Save(Action<IEnumerable<TValue>> updateAddDelegate, Action<IEnumerable<TValue>> deleteDelegate);
-
-        /// <summary>
-        /// Update the cached item or add it to the cache.
-        /// </summary>
-        /// <param name="value">Value to update or add.</param>
-        void Update(TValue value);
-
-        /// <summary>
-        /// Update the cached items or add them to the cache.
-        /// </summary>
-        /// <param name="values">Values to update or add.</param>
-        void Update(IEnumerable<TValue> values);
     }
 }

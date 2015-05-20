@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//The MIT License (MIT)
+//https://github.com/DoloSoftware/PicnicCache/blob/master/LICENSE
 
 namespace PicnicCache
 {

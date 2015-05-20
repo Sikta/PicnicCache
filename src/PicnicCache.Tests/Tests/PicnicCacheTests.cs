@@ -11,17 +11,15 @@ namespace PicnicCache.Tests.Tests
     [TestClass]
     public class PicnicCacheTests
     {
+        #region Fields
+
         private ICache<int, TestModel> _cache;
         private IList<TestModel> _list;
-
-        public PicnicCacheTests()
-        {
-            //
-            // TODO: Add constructor logic here
-            //
-        }
-
         private TestContext testContextInstance;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -39,38 +37,48 @@ namespace PicnicCache.Tests.Tests
             }
         }
 
+        #endregion
+
+        #region Constructors
+
+        public PicnicCacheTests()
+        {
+            _list = GetTestList("Testing");
+        }
+
+        #endregion
+
         #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
+
         // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
+        //[ClassInitialize()]
+        //public static void MyClassInitialize(TestContext testContext) { }
+
         // Use ClassCleanup to run code after all tests in a class have run
         // [ClassCleanup()]
         // public static void MyClassCleanup() { }
-        //
+
         // Use TestInitialize to run code before running each test 
         [TestInitialize()]
         public void MyTestInitialize()
         {
             _cache = new PicnicCache<int, TestModel>(x => x.Id);
-            _list = GetTestList("Testing");
         }
-        //
+
         // Use TestCleanup to run code after each test has run
         // [TestCleanup()]
         // public void MyTestCleanup() { }
-        //
+
         #endregion
+
+        #region Fetch Tests
 
         [TestMethod]
         public void Fetch_CacheIsEmpty_ReturnCorrectItem()
         {
             var item = _list.First();
 
-            var cacheItem = _cache.Fetch(item.Id, () =>_list.First());
+            var cacheItem = _cache.Fetch(item.Id, () => _list.First());
 
             Assert.AreEqual(item, cacheItem);
         }
@@ -132,6 +140,10 @@ namespace PicnicCache.Tests.Tests
             Assert.AreEqual(modifiedItem, cacheItem);
         }
 
+        #endregion
+
+        #region FetchAll Tests
+
         [TestMethod]
         public void FetchAll_CacheIsEmpty_ReturnCorrectItems()
         {
@@ -162,6 +174,8 @@ namespace PicnicCache.Tests.Tests
 
             ValidateListsAreEqual(_list, cacheItems);
         }
+
+        #endregion
 
         #region Private helper methods
 
