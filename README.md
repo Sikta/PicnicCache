@@ -21,7 +21,7 @@ public class DataAccessService
     var cacheConfig = new PicnicCacheConfiguration(_myModelRepository.GetMyModelById,
                                                    _myModelRepository.GetAllMyModel,
                                                    _myModelRepository.SaveModels);
-    _myModelCache = new ConfiguredPicnicCache<int, MyModel>(x => x.Id);
+    _myModelCache = new ConfiguredPicnicCache<int, MyModel>(x => x.Id, cacheConfig);
     _myModelRepository = new MyModelRepository();
   }
   
