@@ -35,6 +35,30 @@ public class DataAccessService
     return _myModelCache.FetchAll();
   }
   
+  public void Add(MyModel model)
+  {
+    _myModelCache.Add(model);
+  }
+  
+  public void Clear()
+  {
+    _myModelCache.Clear();
+  }
+  
+  public void Update(MyModel model)
+  {
+    _myModelCache.Update(model);
+    //also supports selective updating of properties
+    //if you pass in a Func<T, TValue, TValue> method
+    //using one of the Update overrides.
+  }
+  
+  public void Delete(MyModel model)
+  {
+    _myModelCache.Delete(model);
+    //also supports deleting by key
+  }
+  
   public void Save()
   {
     _myModelCache.Save();
