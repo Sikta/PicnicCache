@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace PicnicCache
 {
-    public interface IConfiguredCache<TKey, TValue> : ICacheBase<TKey, TValue> where TValue : class, new()
+    public interface IReadOnlyCache<TKey, TValue> where TValue : class
     {
+        /// <summary>
+        /// Clear the cache.
+        /// </summary>
+        void ClearAll();
+
         /// <summary>
         /// Fetch item by key.
         /// </summary>
@@ -33,15 +38,5 @@ namespace PicnicCache
         /// </summary>
         /// <returns>Items</returns>
         Task<IEnumerable<TValue>> FetchAllAsync();
-
-        /// <summary>
-        /// Save all items from the cache.
-        /// </summary>
-        void Save();
-
-        /// <summary>
-        /// Save all items from the cache async.
-        /// </summary>
-        Task SaveAsync();
     }
 }

@@ -3,45 +3,61 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PicnicCache
 {
-    public interface ICache<TKey, TValue> : ICacheBase<TKey, TValue> where TValue : class, new()
+    public interface ICache<TKey, TValue> : IReadOnlyCache<TKey, TValue> where TValue : class
     {
         /// <summary>
-        /// Fetch item by key.
+        /// Add item to the cache.
+        /// </summary>
+        /// <param name="value"></param>
+        void Add(TValue value);
+
+        /// <summary>
+        /// Set the item state to deleted.
         /// </summary>
         /// <param name="key">Item Key</param>
-        /// <param name="del">Func to get the item if it's not already in the cache.</param>
-        /// <returns>Item</returns>
-        TValue Fetch(TKey key, Func<TValue> del);
+        /// <returns>True if item was in cache otherwise false.</returns>
+        bool Delete(TKey key);
 
         /// <summary>
-        /// Fetch all items.
+        /// Set the item state to deleted by value.
         /// </summary>
-        /// <param name="del">Func to get all items if they have not already been cached.</param>
-        /// <returns>Items</returns>
-        IEnumerable<TValue> FetchAll(Func<IEnumerable<TValue>> del);
-
-        /// <summary>
-        /// Save all items from the cache.
-        /// </summary>
-        /// <param name="saveDelegate">Action to update, add and delete all CacheItems.</param>
-        void Save(Action<IEnumerable<ICacheItem<TValue>>> saveDelegate);
+        /// <param name="value">Item Key</param>
+        /// <returns>True if item was in cache otherwise false.</returns>
+        bool Delete(TValue value);
 
         /// <summary>
         /// Save all items from the cache.
         /// </summary>
-        /// <param name="updateDelegate">Action to update the cached items</param>
-        /// <param name="addDelegate">Action to add the cached items</param>
-        /// <param name="deleteDelegate">Action to delete the cached items</param>
-        void Save(Action<IEnumerable<TValue>> updateDelegate, Action<IEnumerable<TValue>> addDelegate, Action<IEnumerable<TValue>> deleteDelegate);
+        void Save();
 
         /// <summary>
-        /// Save all items from the cache.
+        /// Save all items from the cache async.
         /// </summary>
-        /// <param name="updateAddDelegate">Action to update and add the cached items.</param>
-        /// <param name="deleteDelegate">Action to delete the cached items.</param>
-        void Save(Action<IEnumerable<TValue>> updateAddDelegate, Action<IEnumerable<TValue>> deleteDelegate);
+        Task SaveAsync();
+
+        /// <summary>
+        /// Update the cached item.
+        /// </summary>
+        /// <param name="value">Value to update or add.</param>
+        void Update(TValue value);
+
+        /// <summary>
+        /// Update the cached item from a dto.
+        /// </summary>
+        /// <typeparam name="T">DTO Type</typeparam>
+        /// <param name="key">Item Key</param>
+        /// <param name="dto">DTO to update the cache item.</param>
+        /// <param name="updateCacheItemMethod">Method to update cached item.</param>
+        void Update<T>(TKey key, T dto, Func<T, TValue, TValue> updateCacheItemMethod);
+
+        /// <summary>
+        /// Update the cached items.
+        /// </summary>
+        /// <param name="values">Values to update or add.</param>
+        void Update(IEnumerable<TValue> values);
     }
 }

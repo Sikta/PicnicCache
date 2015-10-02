@@ -3,25 +3,33 @@
 
 namespace PicnicCache
 {
-    public class CacheItem<TValue> : ICacheItem<TValue> where TValue : class, new()
+    internal class PicnicCacheItem<TValue> : ICacheItem<TValue> 
+        where TValue : class
     {
+        #region Properties
+
         public TValue Item { get; set; }
 
         public CacheItemState Status { get; set; }
 
-        internal CacheItem(TValue value, CacheItemState status)
+        #endregion
+
+        #region Constructors
+
+        internal PicnicCacheItem(TValue value, CacheItemState status)
         {
             Item = value;
             Status = status;
         }
+
+        #endregion
     }
 
-    public enum CacheItemState
+    internal enum CacheItemState
     {
         Added,
         Deleted,
         Modified,
-        NoTracking,
         Unmodified,
     }
 }

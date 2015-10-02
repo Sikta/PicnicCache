@@ -1,31 +1,37 @@
-﻿
+﻿//The MIT License (MIT)
+//https://github.com/DoloSoftware/PicnicCache/blob/master/LICENSE
+
 namespace PicnicCache.Tests.Models
 {
-    public class TestModel
+    public class TestModel : ITestObject
     {
-        public int GroupId { get; set; }
-
-        public int Id { get; set; }
-
-        public string Text { get; set; }
+        #region Constructors
 
         public TestModel()
         {
 
         }
 
-        public TestModel(int id, int groupId, string text)
-        {
-            Id = id;
-            GroupId = groupId;
-            Text = text;
-        }
-
         public TestModel(TestModel model)
         {
             Id = model.Id;
-            GroupId = model.GroupId;
-            Text = model.Text;
+            Name = model.Name;
+            City = model.City;
+            State = model.State;
         }
+
+        #endregion
+
+        #region ITestObject
+
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        #endregion
     }
 }

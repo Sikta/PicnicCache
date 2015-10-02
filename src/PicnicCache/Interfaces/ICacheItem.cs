@@ -3,7 +3,7 @@
 
 namespace PicnicCache
 {
-    public interface ICacheItem<TValue> where TValue : class, new()
+    internal interface ICacheItem<TValue> where TValue : class
     {
         /// <summary>
         /// Wrapped item.
