@@ -11,18 +11,36 @@ public class MyModel
   public string Name { get; set; }
 }
 
+public class MyModelRepository : IMyModelRepository, ICacheable<int, MyModel>
+{
+   public MyModel Fetch(int key)
+   {
+      //Method loading MyModel with Id = key
+   }
+   
+   public IEnumerable<MyModel> FetchAll()
+   {
+      //Method returning all MyModel
+      //Can get creative and have this method filter to a certain type
+      //and create a separate cache for each filter. Could also wrap
+      //your repository in a PicnicCacheMapping so you can use
+      //one repository but map your filtered FetchAll methods to different
+      //caches.
+   }
+   
+   public void Save(IEnumerable<MyModel> added, IEnumerable<MyModel> deleted, IEnumerable<MyModel> updated)
+   {
+      //Method to save all modified items
+   }
+}
+
 public class DataAccessService
 {
-  private IConfiguredCache<int, MyModel> _myModelCache;
-  private IMyModelRepository _myModelRepository;
+  private ICache<int, MyModel> _myModelCache;
   
   public DataAccessService()
   {
-    _myModelRepository = new MyModelRepository();
-    var cacheConfig = new PicnicCacheConfiguration(_myModelRepository.GetMyModelById,
-                                                   _myModelRepository.GetAllMyModel,
-                                                   _myModelRepository.SaveModels);
-    _myModelCache = new ConfiguredPicnicCache<int, MyModel>(x => x.Id, cacheConfig);
+    _myModelCache = new PicnicCache<int, MyModel>(new MyModelRepository());
   }
   
   public MyModel GetMyModelById(int id)
@@ -42,7 +60,7 @@ public class DataAccessService
   
   public void Clear()
   {
-    _myModelCache.Clear();
+    _myModelCache.ClearAll();
   }
   
   public void Update(MyModel model)
