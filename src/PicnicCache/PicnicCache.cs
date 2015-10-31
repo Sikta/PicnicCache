@@ -48,7 +48,7 @@ namespace PicnicCache
 
         public void Add(TValue value)
         {
-            ValidateParameterIsNotNull(value, "value");
+            ValidateParameterIsNotNull(value, nameof(value));
 
             lock (_lockObject)
             {
@@ -58,7 +58,7 @@ namespace PicnicCache
 
         public bool Delete(TKey key)
         {
-            ValidateParameterIsNotNull(key, "key");
+            ValidateParameterIsNotNull(key, nameof(key));
 
             bool isItemInCache = false;
 
@@ -84,7 +84,7 @@ namespace PicnicCache
 
         public bool Delete(TValue value)
         {
-            ValidateParameterIsNotNull(value, "value");
+            ValidateParameterIsNotNull(value, nameof(value));
 
             return Delete(_keyProperty(value));
         }
@@ -106,7 +106,7 @@ namespace PicnicCache
         
         public void Update(TValue value)
         {
-            ValidateParameterIsNotNull(value, "value");
+            ValidateParameterIsNotNull(value, nameof(value));
 
             lock (_lockObject)
             {
@@ -116,9 +116,9 @@ namespace PicnicCache
 
         public void Update<T>(TKey key, T dto, Func<T, TValue, TValue> updateCacheItemMethod)
         {
-            ValidateParameterIsNotNull(key, "key");
-            ValidateParameterIsNotNull(dto, "dto");
-            ValidateParameterIsNotNull(updateCacheItemMethod, "updateCacheItemMethod");
+            ValidateParameterIsNotNull(key, nameof(key));
+            ValidateParameterIsNotNull(dto, nameof(dto));
+            ValidateParameterIsNotNull(updateCacheItemMethod, nameof(updateCacheItemMethod));
 
             lock (_lockObject)
             {
@@ -128,7 +128,7 @@ namespace PicnicCache
 
         public void Update(IEnumerable<TValue> values)
         {
-            ValidateParameterIsNotNull(values, "values");
+            ValidateParameterIsNotNull(values, nameof(values));
 
             lock (_lockObject)
             {
@@ -172,7 +172,7 @@ namespace PicnicCache
             if (_dictionary.TryGetValue(key, out cacheItem))
             {
                 if (cacheItem.Status == CacheItemState.Deleted)
-                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.")
+                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.");
 
                 CacheItemState state = cacheItem.Status == CacheItemState.Added ? CacheItemState.Added : CacheItemState.Modified;
                 _dictionary[key] = new PicnicCacheItem<TValue>(value, state);

@@ -21,7 +21,7 @@ namespace PicnicCache
                                   Action<IEnumerable<TValue>, IEnumerable<TValue>, IEnumerable<TValue>> save)
             : base(fetch, fetchAll)
         {
-            ValidateParameterIsNotNull(save, "save");
+            ValidateParameterIsNotNull(save, nameof(save));
 
             _save = save;
         }

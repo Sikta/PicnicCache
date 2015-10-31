@@ -41,7 +41,7 @@ namespace PicnicCache
 
         protected ReadOnlyPicnicCache(IReadOnlyCacheable<TKey, TValue> readOnlyCacheable)
         {
-            ValidateParameterIsNotNull(readOnlyCacheable, "readOnlyCacheable");
+            ValidateParameterIsNotNull(readOnlyCacheable, nameof(readOnlyCacheable));
             ReadOnlyCacheable = readOnlyCacheable;
         }
 
@@ -54,7 +54,7 @@ namespace PicnicCache
         public ReadOnlyPicnicCache(Func<TValue, TKey> keyProperty, IReadOnlyCacheable<TKey, TValue> readOnlyCacheable)
             : this(readOnlyCacheable)
         {
-            ValidateParameterIsNotNull(keyProperty, "keyProperty");
+            ValidateParameterIsNotNull(keyProperty, nameof(keyProperty));
 
             _keyProperty = keyProperty;
         }
@@ -74,7 +74,7 @@ namespace PicnicCache
 
         public TValue Fetch(TKey key)
         {
-            ValidateParameterIsNotNull(key, "key");
+            ValidateParameterIsNotNull(key, nameof(key));
 
             return FetchInternal(key, () => ReadOnlyCacheable.Fetch(key));
         }
@@ -155,13 +155,14 @@ namespace PicnicCache
 
         protected void SetKeyProperty(string keyPropertyName)
         {
-            ValidateParameterIsNotNull(keyPropertyName, "keyPropertyName");
+            ValidateParameterIsNotNull(keyPropertyName, nameof(keyPropertyName));
 
             PropertyInfo propertyInfo = typeof(TValue).GetRuntimeProperty(keyPropertyName);
             if (propertyInfo == null)
-                throw new ArgumentException(string.Format("The property ({0}) does not exist on the type ({1}).",
-                                                          keyPropertyName,
-                                                          typeof(TValue).Name));
+            {
+                var typeName = typeof(TValue).Name;
+                throw new ArgumentException($"The property ({keyPropertyName}) does not exist on the type ({typeName}).");
+            }
             _keyProperty = x => (TKey)propertyInfo.GetValue(x);
         }
 
