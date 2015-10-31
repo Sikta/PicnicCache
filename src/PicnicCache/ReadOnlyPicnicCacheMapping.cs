@@ -33,12 +33,12 @@ namespace PicnicCache
 
         public TValue Fetch(TKey key)
         {
-            return _fetch.Invoke(key);
+            return _fetch(key);
         }
 
         public IEnumerable<TValue> FetchAll()
         {
-            return _fetchAll.Invoke();
+            return _fetchAll();
         }
 
         #endregion

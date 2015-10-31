@@ -142,21 +142,6 @@ namespace PicnicCache
             }
         }
 
-        //public void Update<T>(TKey key, IEnumerable<T> dtos, Func<T, TValue, TValue> updateCacheItemMethod)
-        //{
-        //    ValidateParameterIsNotNull(key, "key");
-        //    ValidateParameterIsNotNull(dtos, "dtos");
-        //    ValidateParameterIsNotNull(updateCacheItemMethod, "updateCacheItemMethod");
-
-        //    lock (_lockObject)
-        //    {
-        //        foreach (var dto in dtos)
-        //        {
-        //            UpdateValue(key, dto, updateCacheItemMethod);
-        //        }
-        //    }
-        //}
-
         #endregion
 
         #region Methods
@@ -187,14 +172,14 @@ namespace PicnicCache
             if (_dictionary.TryGetValue(key, out cacheItem))
             {
                 if (cacheItem.Status == CacheItemState.Deleted)
-                    throw new InvalidOperationException(string.Format("The item (key: {0}) is currently deleted.", key));
+                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.")
 
                 CacheItemState state = cacheItem.Status == CacheItemState.Added ? CacheItemState.Added : CacheItemState.Modified;
                 _dictionary[key] = new PicnicCacheItem<TValue>(value, state);
             }
             else
             {
-                throw new InvalidOperationException(string.Format("The item (key: {0}) is not in the cache.", key));
+                throw new InvalidOperationException($"The item (key: {key}) is not in the cache.");
             }
         }
 
@@ -205,7 +190,7 @@ namespace PicnicCache
             if (_dictionary.TryGetValue(key, out cacheItem))
             {
                 if (cacheItem.Status == CacheItemState.Deleted)
-                    throw new InvalidOperationException(string.Format("The item (key: {0}) is currently deleted.", key));
+                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.");
 
                 CacheItemState state = cacheItem.Status == CacheItemState.Added ? CacheItemState.Added : CacheItemState.Modified;
                 newValue = del(dto, cacheItem.Item);
@@ -213,7 +198,7 @@ namespace PicnicCache
             }
             else
             {
-                throw new InvalidOperationException(string.Format("The item (key: {0}) is not in the cache.", key));
+                throw new InvalidOperationException($"The item (key: {key}) is not in the cache.");
             }
         }
 
