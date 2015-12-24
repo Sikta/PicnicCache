@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/st6uhut579chxx58/branch/master?svg=true)](https://ci.appveyor.com/project/Sikta/picniccache/branch/master)
+
 # PicnicCache
 A simple caching library
 
