@@ -4,93 +4,77 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace PicnicCache
 {
-    public class PicnicCache<TKey, TValue> : ICache<TKey, TValue> where TValue : class, new()
+    public class PicnicCache<TKey, TValue> : ReadOnlyPicnicCache<TKey, TValue>, ICache<TKey, TValue> 
+        where TValue : class
     {
-        #region Fields
+        #region Properties
 
-        private readonly IDictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
-        private readonly Func<TValue, TKey> _keyProperty;
-        private readonly object _lockObject = new object();
-
-        private bool _isAllLoaded = false;
+        private ICacheable<TKey, TValue> Cacheable
+        {
+            get { return (ICacheable<TKey, TValue>)_readOnlyCacheable; }
+            set { _readOnlyCacheable = value; }
+        }
 
         #endregion
 
         #region Constructors
 
-        public PicnicCache(string keyPropertyName)
+        protected PicnicCache(ICacheable<TKey, TValue> cacheable)
         {
-            ValidateParameterIsNotNull(keyPropertyName, "keyPropertyName");
-
-            PropertyInfo propertyInfo = typeof(TValue).GetRuntimeProperty(keyPropertyName);
-            if (propertyInfo == null)
-                throw new ArgumentException(string.Format("The property: {0} does no exist on the type: {1}.", keyPropertyName, typeof(TValue).FullName));
-            _keyProperty = (Func<TValue, TKey>)(x => (TKey)propertyInfo.GetValue(x));
+            ValidateParameterIsNotNull(cacheable, "cacheable");
+            Cacheable = cacheable;
         }
 
-        public PicnicCache(Func<TValue, TKey> keyProperty)
+        public PicnicCache(string keyPropertyName, ICacheable<TKey, TValue> cacheable)
+            : this(cacheable)
+        {
+            SetKeyProperty(keyPropertyName);
+        }
+
+        public PicnicCache(Func<TValue, TKey> keyProperty, ICacheable<TKey, TValue> cacheable)
+            : this(cacheable)
         {
             ValidateParameterIsNotNull(keyProperty, "keyProperty");
-
             _keyProperty = keyProperty;
         }
 
         #endregion
 
-        #region ICache Implementation
+        #region ICache
 
-        public void ClearAll()
+        public void Add(TValue value)
         {
+            ValidateParameterIsNotNull(value, nameof(value));
+
             lock (_lockObject)
             {
-                _dictionary.Clear();
+                _dictionary.Add(_keyProperty(value), new PicnicCacheItem<TValue>(value, CacheItemState.Added));
             }
         }
 
-        public TValue Fetch(TKey key, Func<TValue> del)
+        public bool Delete(TKey key)
         {
-            ValidateParameterIsNotNull(del, "del");
-            ValidateParameterIsNotNull(key, "key");
-
-            TValue value;
-            lock (_lockObject)
-            {
-                if (!_dictionary.TryGetValue(key, out value))
-                {
-                    value = del();
-                    if (value != null)
-                        _dictionary.Add(key, value);
-                }
-            }
-            return value;
-        }
-
-        public IEnumerable<TValue> FetchAll(Func<IEnumerable<TValue>> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-
-            if (!_isAllLoaded)
-            {
-                FetchAllInternal(del);
-            }
-            return _dictionary.Values;
-        }
-
-        public bool Remove(TKey key)
-        {
-            ValidateParameterIsNotNull(key, "key");
+            ValidateParameterIsNotNull(key, nameof(key));
 
             bool isItemInCache = false;
 
             lock (_lockObject)
             {
-                if (_dictionary.ContainsKey(key))
+                ICacheItem<TValue> cacheValue;
+                if (_dictionary.TryGetValue(key, out cacheValue))
                 {
-                    _dictionary.Remove(key);
+                    if (cacheValue.Status == CacheItemState.Added)
+                    {
+                        _dictionary.Remove(key);
+                    }
+                    else
+                    {
+                        cacheValue.Status = CacheItemState.Deleted;
+                    }
                     isItemInCache = true;
                 }
             }
@@ -98,126 +82,63 @@ namespace PicnicCache
             return isItemInCache;
         }
 
-        public bool Remove(TValue value)
+        public bool Delete(TValue value)
         {
-            return Remove(_keyProperty(value));
+            ValidateParameterIsNotNull(value, nameof(value));
+
+            return Delete(_keyProperty(value));
         }
 
-        public bool Delete(TKey key, Action del)
+        public void Save()
         {
-            ValidateParameterIsNotNull(del, "del");
+            var addedItems = GetCacheItemsByState(CacheItemState.Added);
+            var deletedItems = GetCacheItemsByState(CacheItemState.Deleted);
+            var modifiedItems = GetCacheItemsByState(CacheItemState.Modified);
 
-            var result = Remove(key);
-            del();
-            return result;
+            Cacheable.Save(addedItems, deletedItems, modifiedItems);
+            ResetCacheItemStatus();
         }
 
-        public bool Delete(TKey key, Action<TKey> del)
+        public Task SaveAsync()
         {
-            ValidateParameterIsNotNull(del, "del");
-
-            var result = Remove(key);
-            del(key);
-            return result;
-        }
-
-        public bool Delete(TValue value, Action del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-            ValidateParameterIsNotNull(value, "value");
-
-            var result = Remove(_keyProperty(value));
-            del();
-            return result;
-        }
-
-        public bool Delete(TValue value, Action<TValue> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-            ValidateParameterIsNotNull(value, "value");
-
-            var result = Remove(_keyProperty(value));
-            del(value);
-            return result;
-        }
-
-        public bool Delete(TValue value, Action<TKey> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-            ValidateParameterIsNotNull(value, "value");
-
-            TKey key = _keyProperty(value);
-            var result = Remove(key);
-            del(key);
-            return result;
-        }
-
-        public void SaveAll(Action<IEnumerable<TValue>> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-            del(_dictionary.Values);
-        }
-
-        public void Save(TValue value, Action del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-
-            UpdateCache(value);
-            del();
-        }
-
-        public void Save(TValue value, Action<TValue> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-
-            UpdateCache(value);
-            del(value);
-        }
-
-        public void SaveAll(TValue value, Action<IEnumerable<TValue>> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-            
-            UpdateCache(value);
-            del(_dictionary.Values);
-        }
-
-        public void SaveAll(IEnumerable<TValue> values, Action<IEnumerable<TValue>> del)
-        {
-            ValidateParameterIsNotNull(del, "del");
-
-            foreach (var value in values)
-            {
-                UpdateCache(value);
-            }
-            del(_dictionary.Values);
+            return Task.Factory.StartNew(() => Save());
         }
         
-        public void UpdateCache(TValue value)
+        public void Update(TValue value)
         {
-            ValidateParameterIsNotNull(value, "value");
+            ValidateParameterIsNotNull(value, nameof(value));
 
-            var key = _keyProperty(value);
             lock (_lockObject)
             {
-                if (_dictionary.ContainsKey(key))
-                {
-                    _dictionary[key] = value;
-                }
-                else
-                {
-                    _dictionary.Add(key, value);
-                }
+                UpdateValue(_keyProperty(value), value);
             }
         }
 
-        public void UpdateCache(IEnumerable<TValue> values)
+        public void Update<T>(TKey key, T dto, Func<T, TValue, TValue> updateCacheItemMethod)
         {
-            ValidateParameterIsNotNull(values, "values");
+            ValidateParameterIsNotNull(key, nameof(key));
+            ValidateParameterIsNotNull(dto, nameof(dto));
+            ValidateParameterIsNotNull(updateCacheItemMethod, nameof(updateCacheItemMethod));
 
-            foreach (var value in values)
+            lock (_lockObject)
             {
-                UpdateCache(value);
+                UpdateValue(key, dto, updateCacheItemMethod);
+            }
+        }
+
+        public void Update(IEnumerable<TValue> values)
+        {
+            ValidateParameterIsNotNull(values, nameof(values));
+
+            lock (_lockObject)
+            {
+                foreach (var value in values)
+                {
+                    if (value != null)
+                    {
+                        UpdateValue(_keyProperty(value), value);
+                    }
+                }
             }
         }
 
@@ -225,26 +146,60 @@ namespace PicnicCache
 
         #region Methods
 
-        protected void FetchAllInternal(Func<IEnumerable<TValue>> del)
+        internal IEnumerable<TValue> GetCacheItemsByState(CacheItemState state)
         {
-            IEnumerable<TValue> values = del();
-            if (values != null)
-            {
-                lock (_lockObject)
-                {
-                    foreach (var value in values.Where(x => !_dictionary.ContainsKey(_keyProperty(x))))
-                    {
-                        _dictionary.Add(_keyProperty(value), value);
-                    }
-                }
-            }
-            _isAllLoaded = true;
+            return _dictionary.Values.Where(v => v.Status == state).Select(i => i.Item).ToList();
         }
 
-        private void ValidateParameterIsNotNull(object parameter, string parameterName)
+        protected void ResetCacheItemStatus()
         {
-            if (parameter == null)
-                throw new ArgumentException(string.Format("The parameter: {0} can not be null."));
+            if (_dictionary.Count == 0)
+                return;
+
+            var items = _dictionary.Values.Where(x => x.Status != CacheItemState.Unmodified);
+            if (items != null)
+            {
+                foreach (var cacheItem in items)
+                {
+                    cacheItem.Status = CacheItemState.Unmodified;
+                }
+            }
+        }
+
+        protected void UpdateValue(TKey key, TValue value)
+        {
+            ICacheItem<TValue> cacheItem;
+            if (_dictionary.TryGetValue(key, out cacheItem))
+            {
+                if (cacheItem.Status == CacheItemState.Deleted)
+                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.");
+
+                CacheItemState state = cacheItem.Status == CacheItemState.Added ? CacheItemState.Added : CacheItemState.Modified;
+                _dictionary[key] = new PicnicCacheItem<TValue>(value, state);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The item (key: {key}) is not in the cache.");
+            }
+        }
+
+        protected void UpdateValue<T>(TKey key, T dto, Func<T, TValue, TValue> del)
+        {
+            ICacheItem<TValue> cacheItem;
+            TValue newValue;
+            if (_dictionary.TryGetValue(key, out cacheItem))
+            {
+                if (cacheItem.Status == CacheItemState.Deleted)
+                    throw new InvalidOperationException($"The item (key: {key}) is currently deleted.");
+
+                CacheItemState state = cacheItem.Status == CacheItemState.Added ? CacheItemState.Added : CacheItemState.Modified;
+                newValue = del(dto, cacheItem.Item);
+                _dictionary[key] = new PicnicCacheItem<TValue>(newValue, state);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The item (key: {key}) is not in the cache.");
+            }
         }
 
         #endregion
